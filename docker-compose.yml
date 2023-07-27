@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: app
+    depends_on:
+      - mysql
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - .:/app
+    command: sh -c "go run ./migrate.go && air ./cmd/server/main.go -b 0.0.0.0"
+    networks:
+      - twitter
+
+  mysql:
+    image: 'mysql:8.0'
+    container_name: mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:3306
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - twitter
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    ports:
+      - 8081:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    networks:
+      - twitter
+
+networks:
+  twitter:
+    driver: bridge
+
+volumes:
+  mysqldata:
+    driver: local
