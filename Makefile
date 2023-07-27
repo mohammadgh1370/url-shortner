@@ -9,3 +9,6 @@ up:
 
 down:
 	@docker-compose down -v
+
+exec-app:
+	@docker exec -it app sh
