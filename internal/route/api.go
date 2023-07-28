@@ -2,7 +2,6 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/mohammadgh1370/url-shortner/internal/config"
 	"github.com/mohammadgh1370/url-shortner/internal/controller"
 	"github.com/mohammadgh1370/url-shortner/internal/middleware"
 	"github.com/mohammadgh1370/url-shortner/internal/repository/mysql"
@@ -10,16 +9,23 @@ import (
 )
 
 func InitRouts(app *fiber.App, db *gorm.DB) {
-	api := app.Group("/api")
+	apiRoute := app.Group("/api")
 
-	auth := api.Group("/auth")
+	authRoute := apiRoute.Group("/auth")
+	authMiddleware := middleware.NewAuthMiddleware(db)
 
 	userRepo := mysql.NewMysqlUserRepo(db)
-	controller := controller.NewAuthController(userRepo)
+	authController := controller.NewAuthController(userRepo)
 
-	authMiddleware := middleware.NewAuthMiddleware(config.JWT_SECRET_KEY)
+	authRoute.Post("/register", authController.Register)
+	authRoute.Post("/login", authController.Login)
+	authRoute.Get("/me", authMiddleware, authController.Me)
 
-	auth.Post("/register", controller.Register)
-	auth.Post("/login", controller.Login)
-	auth.Get("/me", authMiddleware, controller.Me)
+	linkRoute := apiRoute.Group("/link")
+	linkRepo := mysql.NewMysqlLinkRepo(db)
+	linkController := controller.NewLinkController(linkRepo)
+
+	linkRoute.Post("/", authMiddleware, linkController.Store)
+	publicController := controller.NewPublicController(linkRepo)
+	app.Get("/:hash", publicController.Redirect)
 }

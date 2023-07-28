@@ -9,15 +9,15 @@ import (
 	"time"
 )
 
-type AuthController struct {
+type authController struct {
 	userRepo repository.IUserRepo
 }
 
-func NewAuthController(userRepo repository.IUserRepo) AuthController {
-	return AuthController{userRepo: userRepo}
+func NewAuthController(userRepo repository.IUserRepo) authController {
+	return authController{userRepo: userRepo}
 }
 
-func (c *AuthController) Register(ctx *fiber.Ctx) error {
+func (c authController) Register(ctx *fiber.Ctx) error {
 	request := new(request.UserSignUpRequest)
 	ctx.BodyParser(&request)
 
@@ -67,22 +67,20 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 	return ctx.JSON(response)
 }
 
-func (c *AuthController) Login(ctx *fiber.Ctx) error {
+func (c authController) Login(ctx *fiber.Ctx) error {
 	request := new(request.UserSignInRequest)
 	ctx.BodyParser(&request)
 
 	var user model.User
-
-	if err := c.userRepo.Find(&user, model.User{Username: request.Username}); err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "User not exist.",
-		})
+	c.userRepo.Find(&user, model.User{Username: request.Username})
+	if user.Username != request.Username {
+		response := util.Response{Message: "User not exist."}
+		return ctx.Status(fiber.StatusNotFound).JSON(response)
 	}
 
 	if err := util.VerifyPassword(user.Password, request.Password); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid password",
-		})
+		response := util.Response{Message: "Invalid password"}
+		return ctx.Status(fiber.StatusBadRequest).JSON(response)
 	}
 
 	token, err := util.GenerateAccessToken(request.Username)
@@ -96,16 +94,8 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 	return ctx.JSON(response)
 }
 
-func (c *AuthController) Me(ctx *fiber.Ctx) error {
-	var user model.User
-
-	if err := c.userRepo.Find(&user, model.User{Username: ctx.Locals("identifier").(string)}); err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "User not exist.",
-		})
-	}
-
-	response := util.Response{Message: "successful", Data: user}
+func (c authController) Me(ctx *fiber.Ctx) error {
+	response := util.Response{Message: "successful", Data: ctx.Locals("user").(model.User)}
 
 	return ctx.JSON(response)
 }

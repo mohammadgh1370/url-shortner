@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mohammadgh1370/url-shortner/internal/config"
+	"github.com/mohammadgh1370/url-shortner/internal/model"
+	"github.com/mohammadgh1370/url-shortner/internal/repository/mysql"
 	utils "github.com/mohammadgh1370/url-shortner/internal/util"
+	"gorm.io/gorm"
 	"strings"
 )
 
-func NewAuthMiddleware(secret string) fiber.Handler {
+func NewAuthMiddleware(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		var tokenString string
 		authorization := ctx.Get("Authorization")
@@ -27,7 +31,7 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 				return nil, fmt.Errorf("unexpected signing method: %s", jwtToken.Header["alg"])
 			}
 
-			return []byte(secret), nil
+			return []byte(config.JWT_SECRET_KEY), nil
 		})
 
 		if err != nil {
@@ -42,7 +46,15 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 
 		}
 
-		ctx.Locals("identifier", claims["identifier"])
+		var userRepo = mysql.NewMysqlUserRepo(db)
+		var user model.User
+		if err := userRepo.Find(&user, model.User{Username: claims["identifier"].(string)}); err != nil {
+			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "User not exist.",
+			})
+		}
+
+		ctx.Locals("user", user)
 
 		return ctx.Next()
 	}

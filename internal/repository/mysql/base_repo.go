@@ -29,3 +29,7 @@ func (r *BaseRepo) FirstOrCreate(model interface{}, condition interface{}) error
 func (r *BaseRepo) UpdateOrCreate(model interface{}, condition interface{}) error {
 	return r.DB.Where(condition).FirstOrCreate(model).Error
 }
+
+func (r *BaseRepo) Count(model interface{}, condition interface{}, count *int64) error {
+	return r.DB.Model(&model).Where(condition).Count(count).Error
+}
