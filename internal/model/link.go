@@ -6,10 +6,11 @@ import (
 )
 
 type Link struct {
-	Id        int    `gorm:"primarykey" json:"-"`
-	User      User   `gorm:"ForeignKey:id;index:idx_user_id_url,unique"`
+	Id        uint   `gorm:"primarykey" json:"-"`
+	UserId    uint   `gorm:"index:idx_user_id_url,unique"`
+	User      User   `gorm:"foreignKey:UserId"`
 	Url       string `gorm:"text;index:idx_user_id_url,unique"`
-	Link      string `gorm:"varchar(191)"`
+	Link      string `gorm:"type:varchar(191);"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
