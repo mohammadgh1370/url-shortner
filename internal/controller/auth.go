@@ -28,7 +28,7 @@ func (c authController) Register(ctx *fiber.Ctx) error {
 
 	var userExist model.User
 
-	c.userRepo.Find(&userExist, model.User{Username: request.Username})
+	c.userRepo.First(&userExist, model.User{Username: request.Username})
 
 	if userExist.Username == request.Username {
 		response := util.ErrorResponse{Message: "User with this username already exist."}
@@ -72,7 +72,7 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 	ctx.BodyParser(&request)
 
 	var user model.User
-	c.userRepo.Find(&user, model.User{Username: request.Username})
+	c.userRepo.First(&user, model.User{Username: request.Username})
 	if user.Username != request.Username {
 		response := util.Response{Message: "User not exist."}
 		return ctx.Status(fiber.StatusNotFound).JSON(response)

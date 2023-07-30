@@ -15,7 +15,7 @@ func (r *BaseRepo) First(model interface{}, condition interface{}) error {
 }
 
 func (r *BaseRepo) Find(model interface{}, condition interface{}) error {
-	return r.DB.Find(model, condition).Error
+	return r.DB.Order("id desc").Find(model, condition).Error
 }
 
 func (r *BaseRepo) Create(model interface{}) error {
@@ -32,4 +32,8 @@ func (r *BaseRepo) UpdateOrCreate(model interface{}, condition interface{}) erro
 
 func (r *BaseRepo) Count(model interface{}, condition interface{}, count *int64) error {
 	return r.DB.Model(&model).Where(condition).Count(count).Error
+}
+
+func (r *BaseRepo) Delete(model interface{}, condition interface{}) error {
+	return r.DB.Where(condition).Delete(&model).Error
 }

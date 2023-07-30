@@ -8,7 +8,7 @@ up:
 	@docker-compose up -d
 
 down:
-	@docker-compose down -v
+	@docker-compose down
 
 exec-app:
 	@docker exec -it app sh

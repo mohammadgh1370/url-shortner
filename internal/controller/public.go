@@ -10,15 +10,16 @@ import (
 
 type publicController struct {
 	linkRepo repository.ILinkRepo
+	viewRepo repository.IViewRepo
 }
 
-func NewPublicController(linkRepo repository.ILinkRepo) publicController {
-	return publicController{linkRepo: linkRepo}
+func NewPublicController(linkRepo repository.ILinkRepo, viewRepo repository.IViewRepo) publicController {
+	return publicController{linkRepo: linkRepo, viewRepo: viewRepo}
 }
 
 func (c publicController) Redirect(ctx *fiber.Ctx) error {
 	linkExist := model.Link{}
-	c.linkRepo.Find(&linkExist, model.Link{Hash: ctx.Params("hash")})
+	c.linkRepo.First(&linkExist, model.Link{Hash: ctx.Params("hash")})
 
 	if linkExist.Hash != ctx.Params("hash") {
 		response := util.Response{Message: "the url not exist"}
@@ -26,6 +27,14 @@ func (c publicController) Redirect(ctx *fiber.Ctx) error {
 	}
 
 	url := generateUrl(linkExist.Url, ctx.Queries())
+
+	view := model.View{
+		LinkId:    linkExist.Id,
+		Ip:        ctx.IP(),
+		UserAgent: ctx.Get("User-Agent"),
+		Referer:   ctx.Get("Referer"),
+	}
+	c.viewRepo.Create(&view)
 
 	return ctx.Redirect(url)
 }

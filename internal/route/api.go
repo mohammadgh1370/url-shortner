@@ -24,8 +24,11 @@ func InitRouts(app *fiber.App, db *gorm.DB) {
 	linkRoute := apiRoute.Group("/link")
 	linkRepo := mysql.NewMysqlLinkRepo(db)
 	linkController := controller.NewLinkController(linkRepo)
-
 	linkRoute.Post("/", authMiddleware, linkController.Store)
-	publicController := controller.NewPublicController(linkRepo)
+	linkRoute.Get("/", authMiddleware, linkController.Index)
+	linkRoute.Delete("/:id", authMiddleware, linkController.Destroy)
+
+	viewRepo := mysql.NewMysqlViewRepo(db)
+	publicController := controller.NewPublicController(linkRepo, viewRepo)
 	app.Get("/:hash", publicController.Redirect)
 }

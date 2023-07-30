@@ -35,7 +35,7 @@ func (c linkController) Store(ctx *fiber.Ctx) error {
 	}
 
 	linkExist := model.Link{}
-	c.linkRepo.Find(&linkExist, model.Link{Url: request.Url, UserId: userId})
+	c.linkRepo.First(&linkExist, model.Link{Url: request.Url, UserId: userId})
 
 	if linkExist.Url == request.Url {
 		response := util.Response{Message: "the url exist"}
@@ -54,6 +54,35 @@ func (c linkController) Store(ctx *fiber.Ctx) error {
 	}
 
 	response := util.Response{Message: "successful", Data: link}
+
+	return ctx.JSON(response)
+}
+
+func (c linkController) Index(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("user").(model.User).Id
+
+	links := []model.Link{}
+	c.linkRepo.Find(&links, model.Link{UserId: userId})
+
+	response := util.Response{Message: "successful", Data: links}
+
+	return ctx.JSON(response)
+}
+
+func (c linkController) Destroy(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("user").(model.User).Id
+	id, _ := ctx.ParamsInt("id")
+
+	linkExist := model.Link{}
+	c.linkRepo.First(&linkExist, model.Link{Id: uint(id), UserId: userId})
+	if linkExist.Id != uint(id) {
+		response := util.Response{Message: "the link does not exist"}
+		return ctx.Status(fiber.StatusBadRequest).JSON(response)
+	}
+
+	c.linkRepo.Delete(model.Link{}, linkExist)
+
+	response := util.Response{Message: "successful"}
 
 	return ctx.JSON(response)
 }

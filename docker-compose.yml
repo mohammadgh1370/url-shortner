@@ -14,7 +14,7 @@ services:
       - ${APP_PORT}:${APP_PORT}
     volumes:
       - .:/app
-    command: sh -c "go run ./migrate.go && air ./cmd/server/main.go -b 0.0.0.0"
+    command: sh -c "go run ./cmd/command/main.go migrate && air ./command/server/main.go -b 0.0.0.0"
     networks:
       - shortner
 

@@ -7,14 +7,14 @@ import (
 )
 
 type Link struct {
-	Id        uint   `gorm:"primarykey" json:"-"`
-	UserId    uint   `gorm:"not null;index:idx_user_id_url,unique"`
-	User      User   `gorm:"foreignKey:UserId" json:"-"`
-	Url       string `gorm:"not null;text;index:idx_user_id_url,unique"`
-	Hash      string `gorm:"not null;type:varchar(191);index"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	Id        uint           `gorm:"primarykey" json:"id"`
+	UserId    uint           `gorm:"not null;" json:"user_id"`
+	User      User           `gorm:"foreignKey:UserId;" json:"-"`
+	Url       string         `gorm:"not null;text;" json:"url"`
+	Hash      string         `gorm:"not null;type:varchar(191);" json:"hash"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
 func (link *Link) BeforeCreate(db *gorm.DB) error {
