@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +9,6 @@ type BaseRepo struct {
 }
 
 func (r *BaseRepo) First(model interface{}, condition interface{}) error {
-	fmt.Println(model, condition)
 	return r.DB.First(model, condition).Error
 }
 

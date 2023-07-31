@@ -9,26 +9,31 @@ import (
 )
 
 func InitRouts(app *fiber.App, db *gorm.DB) {
-	apiRoute := app.Group("/api")
-
-	authRoute := apiRoute.Group("/auth")
 	authMiddleware := middleware.NewAuthMiddleware(db)
 
 	userRepo := mysql.NewMysqlUserRepo(db)
-	authController := controller.NewAuthController(userRepo)
+	linkRepo := mysql.NewMysqlLinkRepo(db)
+	viewRepo := mysql.NewMysqlViewRepo(db)
 
+	authController := controller.NewAuthController(userRepo)
+	linkController := controller.NewLinkController(linkRepo)
+	viewController := controller.NewViewController(linkRepo, viewRepo)
+	publicController := controller.NewPublicController(linkRepo, viewRepo)
+
+	apiRoute := app.Group("/api")
+
+	authRoute := apiRoute.Group("/auth")
 	authRoute.Post("/register", authController.Register)
 	authRoute.Post("/login", authController.Login)
 	authRoute.Get("/me", authMiddleware, authController.Me)
 
 	linkRoute := apiRoute.Group("/link")
-	linkRepo := mysql.NewMysqlLinkRepo(db)
-	linkController := controller.NewLinkController(linkRepo)
 	linkRoute.Post("/", authMiddleware, linkController.Store)
 	linkRoute.Get("/", authMiddleware, linkController.Index)
-	linkRoute.Delete("/:id", authMiddleware, linkController.Destroy)
+	linkRoute.Delete("/", authMiddleware, linkController.Destroy)
 
-	viewRepo := mysql.NewMysqlViewRepo(db)
-	publicController := controller.NewPublicController(linkRepo, viewRepo)
+	viewRoute := apiRoute.Group("/view")
+	viewRoute.Get("/", authMiddleware, viewController.Show)
+
 	app.Get("/:hash", publicController.Redirect)
 }

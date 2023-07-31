@@ -1,5 +1,5 @@
 package request
 
-type LinkStoreRequest struct {
+type LinkRequest struct {
 	Url string `json:"url" validate:"required,url"`
 }

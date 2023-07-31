@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"github.com/mohammadgh1370/url-shortner/internal/database"
 	"github.com/mohammadgh1370/url-shortner/internal/model"
 	"github.com/mohammadgh1370/url-shortner/internal/repository/mysql"
@@ -39,18 +38,6 @@ func commands() {
 }
 
 func schedule() {
-	scheduler := gocron.NewScheduler(time.UTC)
-
-	_, err := scheduler.Every(10).Seconds().Do(task)
-	if err != nil {
-		fmt.Println("Error scheduling task:", err)
-		return
-	}
-
-	scheduler.StartBlocking()
-}
-
-func task() {
 	db := database.ConnectDB()
 
 	userRepo := mysql.NewMysqlUserRepo(db)

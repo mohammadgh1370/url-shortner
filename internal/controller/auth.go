@@ -18,7 +18,7 @@ func NewAuthController(userRepo repository.IUserRepo) authController {
 }
 
 func (c authController) Register(ctx *fiber.Ctx) error {
-	request := new(request.UserSignUpRequest)
+	request := new(request.UserRegisterRequest)
 	ctx.BodyParser(&request)
 
 	if errors := util.Validate(request); errors != nil {
@@ -68,8 +68,13 @@ func (c authController) Register(ctx *fiber.Ctx) error {
 }
 
 func (c authController) Login(ctx *fiber.Ctx) error {
-	request := new(request.UserSignInRequest)
+	request := new(request.UserLoginRequest)
 	ctx.BodyParser(&request)
+
+	if errors := util.Validate(request); errors != nil {
+		response := util.ErrorResponse{Message: "wrong data", Errors: errors}
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(response)
+	}
 
 	var user model.User
 	c.userRepo.First(&user, model.User{Username: request.Username})

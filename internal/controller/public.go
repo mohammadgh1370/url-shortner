@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mohammadgh1370/url-shortner/internal/model"
 	"github.com/mohammadgh1370/url-shortner/internal/repository"
-	"github.com/mohammadgh1370/url-shortner/internal/util"
+	"net/http"
 	"net/url"
 )
 
@@ -22,8 +22,7 @@ func (c publicController) Redirect(ctx *fiber.Ctx) error {
 	c.linkRepo.First(&linkExist, model.Link{Hash: ctx.Params("hash")})
 
 	if linkExist.Hash != ctx.Params("hash") {
-		response := util.Response{Message: "the url not exist"}
-		return ctx.Status(fiber.StatusNotFound).JSON(response)
+		return ctx.Status(http.StatusNotFound).SendString("")
 	}
 
 	url := generateUrl(linkExist.Url, ctx.Queries())
@@ -32,11 +31,10 @@ func (c publicController) Redirect(ctx *fiber.Ctx) error {
 		LinkId:    linkExist.Id,
 		Ip:        ctx.IP(),
 		UserAgent: ctx.Get("User-Agent"),
-		Referer:   ctx.Get("Referer"),
 	}
 	c.viewRepo.Create(&view)
 
-	return ctx.Redirect(url)
+	return ctx.Status(http.StatusMovedPermanently).Redirect(url)
 }
 
 func generateUrl(address string, queryParams map[string]string) string {

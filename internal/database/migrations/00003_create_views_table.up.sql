@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS `views` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
     `link_id` bigint UNSIGNED NOT NULL,
     `ip` varchar(191) NOT NULL,
-    `referer` varchar(191) DEFAULT NULL,
     `user_agent` longtext,
     `created_at` datetime(3) DEFAULT NULL,
     `updated_at` datetime(3) DEFAULT NULL,
