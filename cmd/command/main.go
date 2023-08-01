@@ -66,7 +66,7 @@ func removeLinkNotUseYearAgo() {
 
 	var links []model.Link
 
-	yearAgo := time.Now().AddDate(0, 0, -1)
+	yearAgo := time.Now().AddDate(-1, 0, 0)
 	linkRepo.Find(&links, "created_at < '"+yearAgo.Format(time.RFC3339)+"'")
 
 	for _, link := range links {
