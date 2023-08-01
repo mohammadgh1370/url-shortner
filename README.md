@@ -2,6 +2,7 @@
 
 ### How to run
 
-1. first clone repo .
-2. just run make:build ```Notice: remember turn on your vpn for download dependency```.
-3. open postman collection ```URLShortner.postman_collection.json``` for test .
+1. First, clone the repository .
+2. Simply run ```make build``` .
+> Notice: Remember to turn on your VPN to download dependencies.
+3. Open the Postman collection ```URLShortner.postman_collection.json``` for testing .
