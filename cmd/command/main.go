@@ -3,14 +3,24 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/go-co-op/gocron"
+	"github.com/mohammadgh1370/url-shortner/internal/config"
 	"github.com/mohammadgh1370/url-shortner/internal/database"
 	"github.com/mohammadgh1370/url-shortner/internal/model"
 	"github.com/mohammadgh1370/url-shortner/internal/repository/mysql"
-	"math/rand"
 	"os"
 	"strconv"
 	"time"
 )
+
+func init() {
+	tehranTimeZone, err := time.LoadLocation(config.TIME_ZONE)
+	if err != nil {
+		panic(err)
+	}
+
+	time.Local = tehranTimeZone
+}
 
 func main() {
 	if len(os.Args) > 1 {
@@ -38,20 +48,32 @@ func commands() {
 }
 
 func schedule() {
-	db := database.ConnectDB()
+	s := gocron.NewScheduler(time.UTC)
 
-	userRepo := mysql.NewMysqlUserRepo(db)
-
-	id := strconv.Itoa(rand.Int())
-	now := time.Now()
-	newUser := model.User{
-		FirstName: "mohammad",
-		LastName:  "ghorbani",
-		Username:  "mohammad" + id,
-		Password:  "123456",
-		CreatedAt: now,
-		UpdatedAt: now,
+	_, err := s.Every(60).Seconds().Do(removeLinkNotUseYearAgo)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
-	userRepo.Create(&newUser)
+	s.StartBlocking()
+}
+
+func removeLinkNotUseYearAgo() {
+	db := database.ConnectDB()
+
+	linkRepo := mysql.NewMysqlLinkRepo(db)
+	viewRepo := mysql.NewMysqlViewRepo(db)
+
+	var links []model.Link
+
+	yearAgo := time.Now().AddDate(0, 0, -1)
+	linkRepo.Find(&links, "created_at < '"+yearAgo.Format(time.RFC3339)+"'")
+
+	for _, link := range links {
+		var count int64
+		viewRepo.Count(model.View{}, "created_at > '"+yearAgo.Format(time.RFC3339)+"' and link_id = "+strconv.Itoa(int(link.Id)), &count)
+		if count == 0 {
+			linkRepo.Delete(model.Link{}, link)
+		}
+	}
 }
