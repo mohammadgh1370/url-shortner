@@ -9,11 +9,12 @@ import (
 )
 
 func InitRouts(app *fiber.App, db *gorm.DB) {
-	authMiddleware := middleware.NewAuthMiddleware(db)
 
 	userRepo := mysql.NewMysqlUserRepo(db)
 	linkRepo := mysql.NewMysqlLinkRepo(db)
 	viewRepo := mysql.NewMysqlViewRepo(db)
+
+	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 
 	authController := controller.NewAuthController(userRepo)
 	linkController := controller.NewLinkController(linkRepo)

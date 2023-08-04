@@ -12,3 +12,6 @@ down:
 
 exec-app:
 	@docker exec -it app sh
+
+test:
+	@docker exec -i app sh -c "go test -v ./internal/controller/"
