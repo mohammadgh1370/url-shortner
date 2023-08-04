@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "d7ee731a-1a54-4f63-95d0-f59688db9a08",
+		"_postman_id": "23fa8fb6-59ef-4aa9-ad7a-daa80b1a6053",
 		"name": "URLShortner",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "4198729"
+		"_exporter_id": "27316462"
 	},
 	"item": [
 		{
@@ -305,7 +305,7 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"pm.collectionVariables.set(\"base_url\", \"http://localhost:8080\");"
 				]
 			}
 		},
@@ -322,7 +322,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "",
+			"value": "http://localhost:8080",
 			"type": "string"
 		},
 		{
